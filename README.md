@@ -1,36 +1,112 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Social Analysis
 
-## Getting Started
+Приложение для анализа и повышения влияния в социальных сетях для бизнеса и блогеров. Система позволяет оценивать текущее влияние в социальных медиа с помощью специализированных индексов и получать рекомендации по улучшению показателей.
 
-First, run the development server:
+## Описание
+
+Social Analysis — это веб-приложение, которое использует передовые математические модели для:
+
+-   Расчета интегрального индекса влияния (II) и индекса устойчивости (SI)
+-   Сравнительного анализа нескольких блогеров для бизнеса
+-   Детального анализа отдельного блогера
+-   Моделирования сценариев улучшения показателей
+-   Формирования конкретных рекомендаций для повышения эффективности
+
+Приложение поддерживает два режима работы:
+
+1. **Режим бизнеса** — для компаний, желающих проанализировать и сравнить нескольких блогеров
+2. **Режим блогера** — для индивидуальных блогеров, желающих оценить и улучшить свои показатели
+
+## Технологии
+
+-   **Frontend**: Next.js 15, React, TypeScript
+-   **Стилизация**: TailwindCSS
+-   **Хранение данных**: LocalStorage (клиентская сторона)
+-   **Компоненты**: React-компоненты с модульной архитектурой
+-   **Типизация**: Строгая типизация с помощью TypeScript
+
+## Функциональные возможности
+
+### Для бизнеса
+
+-   Ввод и анализ данных нескольких блогеров
+-   Автоматическое ранжирование блогеров по влиянию
+-   Сравнительные таблицы ключевых метрик
+-   Настройка параметров анализа через режим эксперта
+
+### Для блогеров
+
+-   Подробный анализ профиля в социальных сетях
+-   Расчет индексов влияния и устойчивости
+-   Моделирование сценариев улучшения:
+    -   Увеличение активности
+    -   Повышение вовлеченности
+    -   Коллаборации
+-   Таблица конкретных рекомендаций по каждому сценарию
+-   Сохранение отчета в формате JSON
+
+### Математические модели
+
+-   Расчет базовых метрик: соотношение подписчиков, темп роста, вовлеченность и др.
+-   Интегральные индексы на основе взвешенных метрик
+-   Моделирование сценариев с прогнозом изменений индексов
+-   Ранжирование сценариев по пригодности, превосходству и оптимальности
+
+## Инструкция по установке
 
 ```bash
+# Клонирование репозитория
+git clone https://github.com/yourusername/social-analysis.git
+cd social-analysis
+
+# Установка зависимостей
+npm install
+
+# Запуск в режиме разработки
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+После запуска приложение будет доступно по адресу: `http://localhost:3000`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Использование
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. **Выбор режима**: Выберите "Режим бизнеса" или "Режим блогера"
+2. **Ввод данных**: Заполните форму с данными о блогере(ах)
+3. **Получение результатов**: После отправки формы система выполнит анализ и отобразит результаты
+4. **Изучение рекомендаций**: Просмотрите сценарии улучшения и рекомендации
+5. **Сохранение отчета**: В режиме блогера можно сохранить отчет в формате JSON
 
-## Learn More
+### Режим эксперта
 
-To learn more about Next.js, take a look at the following resources:
+Для настройки параметров расчета доступен "Режим эксперта", в котором можно:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+-   Настроить веса для расчета индекса влияния (II)
+-   Настроить веса для расчета индекса устойчивости (SI)
+-   Изменить параметры сценариев улучшения
+-   Настроить критерии оптимальности
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Для доступа к режиму эксперта требуется ввести пароль (по умолчанию: "expert").
 
-## Deploy on Vercel
+## Структура проекта
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+-   `/app` - страницы приложения
+    -   `/page.tsx` - главная страница
+    -   `/instruction/page.tsx` - страница с инструкциями
+-   `/components` - React-компоненты
+    -   `input-form.tsx` - форма ввода данных
+    -   `mode-selector.tsx` - селектор режима (бизнес/блогер)
+    -   `results-table.tsx` - таблица результатов анализа
+    -   `expert-settings.tsx` - настройки режима эксперта
+-   `/lib` - библиотеки и утилиты
+    -   `math.ts` - математические функции для расчетов
+    -   `data.ts` - функции для работы с данными
+    -   `types.ts` - TypeScript типы
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Авторство и лицензия
+
+© 2023 Social Analysis Team. Все права защищены.
+
+---
+
+Разработано для анализа и повышения эффективности присутствия в социальных медиа.
+По вопросам обращайтесь: <example@social-analysis.com>
