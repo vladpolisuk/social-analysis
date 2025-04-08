@@ -1,26 +1,55 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+	--background: #f5f5f5;
+	--foreground: #171717;
+	--color-background: var(--background);
+	--color-foreground: var(--foreground);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+.font-onest-sans {
+	font-family: var(--font-onest-sans);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.font-lora-sans {
+	font-family: var(--font-lora-sans);
+}
+
+.font-fira-mono {
+	font-family: var(--font-fira-mono);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+	background: var(--background);
+	color: var(--foreground);
+	font-family: var(--font-onest-sans);
+}
+
+button,
+a,
+select {
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+input {
+	transition: all 0.2s ease;
+}
+
+input:focus {
+	outline: none;
+	border-color: var(--color-foreground);
+}
+
+input:focus-visible {
+	outline: none;
+}
+
+select {
+	appearance: none;
+	background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3E%3C/svg%3E");
+	background-position: right 4px center;
+	background-repeat: no-repeat;
+	background-size: 1.2em 1.2em;
+	padding-right: 2.5rem;
 }
