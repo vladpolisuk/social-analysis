@@ -1,0 +1,86 @@
+{
+  "date": "4/13/2025",
+  "analysis_type": "Сравнительный анализ блогеров",
+  "bloggers": [
+    {
+      "name": "Алексей Стиль",
+      "platform": "Instagram",
+      "category": "Fashion",
+      "influence_index": "0.05",
+      "sustainability_index": "0.28",
+      "metrics": {
+        "followers_ratio": "0.23",
+        "growth_rate": "5.00",
+        "engagement_rate": "0.18",
+        "post_frequency": "0.3",
+        "activity_stability": "0.84",
+        "avg_reach": "0.276",
+        "mentions": 0.35046728971962615
+      }
+    },
+    {
+      "name": "Мария Кулинар",
+      "platform": "YouTube",
+      "category": "Food",
+      "influence_index": "0.16",
+      "sustainability_index": "0.46",
+      "metrics": {
+        "followers_ratio": "0.76",
+        "growth_rate": "3.00",
+        "engagement_rate": "0.32",
+        "post_frequency": "0.2",
+        "activity_stability": "0.90",
+        "avg_reach": "0.414",
+        "mentions": 0.5607476635514018
+      }
+    },
+    {
+      "name": "Иван Техноблог",
+      "platform": "Telegram",
+      "category": "Tech",
+      "influence_index": "0.06",
+      "sustainability_index": "0.29",
+      "metrics": {
+        "followers_ratio": "0.22",
+        "growth_rate": "7.08",
+        "engagement_rate": "0.22",
+        "post_frequency": "0.6",
+        "activity_stability": "0.89",
+        "avg_reach": "0.218",
+        "mentions": 0.2803738317757009
+      }
+    },
+    {
+      "name": "Екатерина Фитнес",
+      "platform": "TikTok",
+      "category": "Fitness",
+      "influence_index": "0.23",
+      "sustainability_index": "0.45",
+      "metrics": {
+        "followers_ratio": "1.00",
+        "growth_rate": "6.25",
+        "engagement_rate": "1.00",
+        "post_frequency": "1.0",
+        "activity_stability": "0.90",
+        "avg_reach": "1",
+        "mentions": 1
+      }
+    },
+    {
+      "name": "Сергей Образование",
+      "platform": "ВКонтакте",
+      "category": "Education",
+      "influence_index": "0.06",
+      "sustainability_index": "0.27",
+      "metrics": {
+        "followers_ratio": "0.26",
+        "growth_rate": "4.12",
+        "engagement_rate": "0.39",
+        "post_frequency": "0.2",
+        "activity_stability": "0.90",
+        "avg_reach": "0.097",
+        "mentions": 0.14018691588785046
+      }
+    }
+  ]
+}

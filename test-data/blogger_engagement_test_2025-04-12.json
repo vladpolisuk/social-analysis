@@ -1,0 +1,56 @@
+{
+  "name": "Алиса Вовлеченность",
+  "platform": "YouTube",
+  "category": "DIY & Crafts",
+  "date": "4/12/2025",
+  "influence_index": "2.91",
+  "sustainability_index": "0.94",
+  "metrics": {
+    "followers_ratio": "4.00",
+    "growth_rate": "7.08",
+    "engagement_rate": "2.58",
+    "post_frequency": "3.8",
+    "activity_stability": "0.95",
+    "avg_reach": "95,000",
+    "mentions": 65
+  },
+  "scenarios": {
+    "activity_scenario": {
+      "name": "Увеличение активности",
+      "delta_ii": 0.040000000000000036,
+      "delta_si": 0.015789473684210575,
+      "cost": 0.2,
+      "description": "Увеличение частоты публикаций и стабильности постинга"
+    },
+    "engagement_scenario": {
+      "name": "Повышение вовлеченности",
+      "delta_ii": 0.2888722222222224,
+      "delta_si": 0.015495060859059162,
+      "cost": 0.2,
+      "description": "Улучшение качества контента для повышения вовлеченности"
+    },
+    "collaboration_scenario": {
+      "name": "Коллаборации",
+      "delta_ii": 0.5767744444444451,
+      "delta_si": 0.004226048970586871,
+      "cost": 0.6,
+      "description": "Коллаборации с другими блогерами для расширения аудитории"
+    },
+    "suitability_ranking": [
+      "activity_scenario",
+      "engagement_scenario",
+      "collaboration_scenario"
+    ],
+    "superiority_ranking": [
+      "collaboration_scenario",
+      "engagement_scenario",
+      "activity_scenario"
+    ],
+    "optimality_ranking": [
+      "engagement_scenario",
+      "collaboration_scenario",
+      "activity_scenario"
+    ],
+    "recommended_scenario": "engagement_scenario"
+  }
+}

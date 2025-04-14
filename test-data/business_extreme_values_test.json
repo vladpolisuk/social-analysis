@@ -1,0 +1,53 @@
+[
+	{
+		"name": "Мега Влиятельный",
+		"platform": "YouTube",
+		"category": "Lifestyle",
+		"subscribers": 25000000,
+		"followers_growth": 1500000,
+		"posts": 350,
+		"post_frequency": 29.1,
+		"likes": 15000000,
+		"comments": 1250000,
+		"shares": 785000,
+		"avg_reach": 12500000,
+		"mentions": 8500,
+		"engagement_rate_std": 3.5,
+		"post_frequency_std": 4.2,
+		"reach_std": 2.8
+	},
+	{
+		"name": "Микро Блогер",
+		"platform": "Instagram",
+		"category": "Beauty",
+		"subscribers": 1500,
+		"followers_growth": 120,
+		"posts": 5,
+		"post_frequency": 0.4,
+		"likes": 180,
+		"comments": 25,
+		"shares": 12,
+		"avg_reach": 450,
+		"mentions": 3,
+		"engagement_rate_std": 0.05,
+		"post_frequency_std": 0.02,
+		"reach_std": 0.01
+	},
+	{
+		"name": "Нестабильный Контент",
+		"platform": "TikTok",
+		"category": "Gaming",
+		"subscribers": 550000,
+		"followers_growth": 35000,
+		"posts": 180,
+		"post_frequency": 15.0,
+		"likes": 450000,
+		"comments": 38000,
+		"shares": 52000,
+		"avg_reach": 320000,
+		"mentions": 150,
+		"engagement_rate_std": 5.9,
+		"post_frequency_std": 7.2,
+		"reach_std": 4.8
+	}
+]

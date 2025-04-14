@@ -1,0 +1,17 @@
+{
+	"name": "Максим Быстрый рост",
+	"platform": "Instagram",
+	"category": "Travel",
+	"subscribers": 85000,
+	"followers_growth": 15000,
+	"posts": 75,
+	"post_frequency": 6.2,
+	"likes": 32000,
+	"comments": 4800,
+	"shares": 2100,
+	"avg_reach": 65000,
+	"mentions": 95,
+	"engagement_rate_std": 0.6,
+	"post_frequency_std": 0.4,
+	"reach_std": 0.3
+}

@@ -1,0 +1,70 @@
+{
+  "date": "4/13/2025",
+  "analysis_type": "Сравнительный анализ блогеров",
+  "bloggers": [
+    {
+      "name": "Ольга Модная",
+      "platform": "Instagram",
+      "category": "Fashion",
+      "influence_index": "0.08",
+      "sustainability_index": "0.30",
+      "metrics": {
+        "followers_ratio": "0.31",
+        "growth_rate": "5.28",
+        "engagement_rate": "0.47",
+        "post_frequency": "0.5",
+        "activity_stability": "0.91",
+        "avg_reach": "0.328",
+        "mentions": 0.38636363636363635
+      }
+    },
+    {
+      "name": "Виктория Стайл",
+      "platform": "Instagram",
+      "category": "Fashion",
+      "influence_index": "0.13",
+      "sustainability_index": "0.47",
+      "metrics": {
+        "followers_ratio": "0.61",
+        "growth_rate": "6.29",
+        "engagement_rate": "0.46",
+        "post_frequency": "0.5",
+        "activity_stability": "0.92",
+        "avg_reach": "0.594",
+        "mentions": 0.5909090909090909
+      }
+    },
+    {
+      "name": "Александр МодаГид",
+      "platform": "Instagram",
+      "category": "Fashion",
+      "influence_index": "0.04",
+      "sustainability_index": "0.33",
+      "metrics": {
+        "followers_ratio": "0.17",
+        "growth_rate": "5.47",
+        "engagement_rate": "0.58",
+        "post_frequency": "0.3",
+        "activity_stability": "0.92",
+        "avg_reach": "0.203",
+        "mentions": 0.20454545454545456
+      }
+    },
+    {
+      "name": "Надежда Тренд",
+      "platform": "Instagram",
+      "category": "Fashion",
+      "influence_index": "0.20",
+      "sustainability_index": "0.45",
+      "metrics": {
+        "followers_ratio": "0.91",
+        "growth_rate": "6.73",
+        "engagement_rate": "0.50",
+        "post_frequency": "0.6",
+        "activity_stability": "0.89",
+        "avg_reach": "0.875",
+        "mentions": 0.8181818181818182
+      }
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "date": "4/13/2025",
+  "analysis_type": "Сравнительный анализ блогеров",
+  "bloggers": [
+    {
+      "name": "Много Лайков",
+      "platform": "Instagram",
+      "category": "Lifestyle",
+      "influence_index": "0.11",
+      "sustainability_index": "0.33",
+      "metrics": {
+        "followers_ratio": "0.50",
+        "growth_rate": "7.50",
+        "engagement_rate": "0.53",
+        "post_frequency": "0.5",
+        "activity_stability": "0.90",
+        "avg_reach": "0.5",
+        "mentions": 0.5
+      }
+    },
+    {
+      "name": "Много Комментариев",
+      "platform": "Instagram",
+      "category": "Lifestyle",
+      "influence_index": "0.11",
+      "sustainability_index": "0.33",
+      "metrics": {
+        "followers_ratio": "0.50",
+        "growth_rate": "7.50",
+        "engagement_rate": "0.49",
+        "post_frequency": "0.5",
+        "activity_stability": "0.90",
+        "avg_reach": "0.5",
+        "mentions": 0.5
+      }
+    },
+    {
+      "name": "Много Репостов",
+      "platform": "Instagram",
+      "category": "Lifestyle",
+      "influence_index": "0.11",
+      "sustainability_index": "0.33",
+      "metrics": {
+        "followers_ratio": "0.50",
+        "growth_rate": "7.50",
+        "engagement_rate": "0.52",
+        "post_frequency": "0.5",
+        "activity_stability": "0.90",
+        "avg_reach": "0.5",
+        "mentions": 0.5
+      }
+    },
+    {
+      "name": "Баланс Вовлеченности",
+      "platform": "Instagram",
+      "category": "Lifestyle",
+      "influence_index": "0.11",
+      "sustainability_index": "0.33",
+      "metrics": {
+        "followers_ratio": "0.50",
+        "growth_rate": "7.50",
+        "engagement_rate": "0.46",
+        "post_frequency": "0.5",
+        "activity_stability": "0.90",
+        "avg_reach": "0.5",
+        "mentions": 0.5
+      }
+    }
+  ]
+}

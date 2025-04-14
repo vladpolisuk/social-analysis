@@ -1,0 +1,17 @@
+{
+	"name": "Минимальные Значения",
+	"platform": "Instagram",
+	"category": "Other",
+	"subscribers": 1,
+	"followers_growth": 1,
+	"posts": 1,
+	"post_frequency": 0.1,
+	"likes": 1,
+	"comments": 1,
+	"shares": 1,
+	"avg_reach": 1,
+	"mentions": 1,
+	"engagement_rate_std": 0.01,
+	"post_frequency_std": 0.01,
+	"reach_std": 0.01
+}

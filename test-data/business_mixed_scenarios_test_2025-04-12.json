@@ -1,0 +1,86 @@
+{
+  "date": "4/13/2025",
+  "analysis_type": "Сравнительный анализ блогеров",
+  "bloggers": [
+    {
+      "name": "Смешанный профиль 1",
+      "platform": "Instagram",
+      "category": "Beauty",
+      "influence_index": "0.09",
+      "sustainability_index": "0.22",
+      "metrics": {
+        "followers_ratio": "0.42",
+        "growth_rate": "7.81",
+        "engagement_rate": "0.38",
+        "post_frequency": "0.2",
+        "activity_stability": "0.64",
+        "avg_reach": "0.447",
+        "mentions": 0.9090909090909091
+      }
+    },
+    {
+      "name": "Смешанный профиль 2",
+      "platform": "YouTube",
+      "category": "Gaming",
+      "influence_index": "0.13",
+      "sustainability_index": "0.31",
+      "metrics": {
+        "followers_ratio": "0.60",
+        "growth_rate": "2.21",
+        "engagement_rate": "0.22",
+        "post_frequency": "0.7",
+        "activity_stability": "0.97",
+        "avg_reach": "0.745",
+        "mentions": 0.12626262626262627
+      }
+    },
+    {
+      "name": "Смешанный профиль 3",
+      "platform": "TikTok",
+      "category": "Comedy",
+      "influence_index": "0.17",
+      "sustainability_index": "0.25",
+      "metrics": {
+        "followers_ratio": "0.79",
+        "growth_rate": "8.44",
+        "engagement_rate": "1.00",
+        "post_frequency": "0.5",
+        "activity_stability": "0.83",
+        "avg_reach": "0.809",
+        "mentions": 0.4797979797979798
+      }
+    },
+    {
+      "name": "Смешанный профиль 4",
+      "platform": "Telegram",
+      "category": "Business",
+      "influence_index": "0.08",
+      "sustainability_index": "0.30",
+      "metrics": {
+        "followers_ratio": "0.32",
+        "growth_rate": "2.92",
+        "engagement_rate": "0.13",
+        "post_frequency": "0.9",
+        "activity_stability": "0.98",
+        "avg_reach": "0.181",
+        "mentions": 0.7070707070707071
+      }
+    },
+    {
+      "name": "Смешанный профиль 5",
+      "platform": "ВКонтакте",
+      "category": "Music",
+      "influence_index": "0.08",
+      "sustainability_index": "0.26",
+      "metrics": {
+        "followers_ratio": "0.37",
+        "growth_rate": "4.52",
+        "engagement_rate": "0.34",
+        "post_frequency": "0.3",
+        "activity_stability": "0.87",
+        "avg_reach": "0.319",
+        "mentions": 0.2777777777777778
+      }
+    }
+  ]
+}

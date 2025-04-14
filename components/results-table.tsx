@@ -10,12 +10,13 @@ interface ResultsTableProps {
 
 export default function ResultsTable({ isBusinessMode, data }: ResultsTableProps) {
 	const [isSaving, setIsSaving] = useState(false);
+	const [showMetricsHelp, setShowMetricsHelp] = useState(false);
 
 	if (!data || data.length === 0) {
 		return null;
 	}
 
-	// Функция для сохранения отчета
+	// Функция для сохранения отчета для одного блогера
 	const saveReport = (blogger: BloggerWithMetrics) => {
 		setIsSaving(true);
 
@@ -62,6 +63,58 @@ export default function ResultsTable({ isBusinessMode, data }: ResultsTableProps
 		} catch (error) {
 			console.error('Ошибка при сохранении отчета:', error);
 			alert('Произошла ошибка при сохранении отчета. Пожалуйста, попробуйте еще раз.');
+		} finally {
+			setIsSaving(false);
+		}
+	};
+
+	// Функция для экспорта данных сравнительного анализа
+	const exportComparisonData = () => {
+		setIsSaving(true);
+
+		try {
+			// Создаем объект с данными сравнительного анализа
+			const comparisonData = {
+				date: new Date().toLocaleDateString(),
+				analysis_type: 'Сравнительный анализ блогеров',
+				bloggers: data.map((blogger) => ({
+					name: blogger.blogger.name,
+					platform: blogger.blogger.platform,
+					category: blogger.blogger.category,
+					influence_index: blogger.metrics.influence_index.toFixed(2),
+					sustainability_index: blogger.metrics.sustainability_index.toFixed(2),
+					metrics: {
+						followers_ratio: blogger.metrics.followers_ratio.toFixed(2),
+						growth_rate: blogger.metrics.growth_rate.toFixed(2),
+						engagement_rate: blogger.metrics.engagement_rate.toFixed(2),
+						post_frequency: blogger.metrics.post_frequency.toFixed(1),
+						activity_stability: blogger.metrics.activity_stability.toFixed(2),
+						avg_reach: blogger.metrics.avg_reach.toLocaleString(),
+						mentions: blogger.metrics.mentions,
+					},
+				})),
+			};
+
+			// Преобразуем данные в JSON-строку и в URL-данные
+			const jsonData = JSON.stringify(comparisonData, null, 2);
+			const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(jsonData);
+
+			// Создаем элемент ссылки для скачивания
+			const downloadAnchorNode = document.createElement('a');
+			downloadAnchorNode.setAttribute('href', dataStr);
+			downloadAnchorNode.setAttribute(
+				'download',
+				`social_analysis_comparison_${new Date().toISOString().slice(0, 10)}.json`,
+			);
+			document.body.appendChild(downloadAnchorNode);
+			downloadAnchorNode.click();
+			downloadAnchorNode.remove();
+
+			// Показываем уведомление об успехе
+			alert('Сравнительный анализ успешно сохранен!');
+		} catch (error) {
+			console.error('Ошибка при сохранении сравнительного анализа:', error);
+			alert('Произошла ошибка при сохранении. Пожалуйста, попробуйте еще раз.');
 		} finally {
 			setIsSaving(false);
 		}
@@ -184,29 +237,29 @@ export default function ResultsTable({ isBusinessMode, data }: ResultsTableProps
 				{/* Таблица рекомендаций */}
 				<div className='mb-6'>
 					<h5 className='font-medium mb-3'>Таблица рекомендаций</h5>
-					<div className='overflow-x-auto'>
+					<div className='overflow-x-auto border border-neutral-200 rounded-lg'>
 						<table className='w-full border-collapse'>
 							<thead>
 								<tr className='bg-neutral-100'>
-									<th className='border border-neutral-200 px-3 py-2 text-left text-xs font-medium'>
+									<th className='border border-neutral-200 px-3 py-2 text-left text-xs font-medium whitespace-nowrap'>
 										Сценарий
 									</th>
-									<th className='border border-neutral-200 px-3 py-2 text-left text-xs font-medium'>
+									<th className='border border-neutral-200 px-3 py-2 text-left text-xs font-medium whitespace-nowrap'>
 										II<sub>s</sub>
 									</th>
-									<th className='border border-neutral-200 px-3 py-2 text-left text-xs font-medium'>
+									<th className='border border-neutral-200 px-3 py-2 text-left text-xs font-medium whitespace-nowrap'>
 										ΔII<sub>s</sub>
 									</th>
-									<th className='border border-neutral-200 px-3 py-2 text-left text-xs font-medium'>
+									<th className='border border-neutral-200 px-3 py-2 text-left text-xs font-medium whitespace-nowrap'>
 										SI<sub>s</sub>
 									</th>
-									<th className='border border-neutral-200 px-3 py-2 text-left text-xs font-medium'>
+									<th className='border border-neutral-200 px-3 py-2 text-left text-xs font-medium whitespace-nowrap'>
 										ΔSI<sub>s</sub>
 									</th>
-									<th className='border border-neutral-200 px-3 py-2 text-left text-xs font-medium'>
+									<th className='border border-neutral-200 px-3 py-2 text-left text-xs font-medium whitespace-nowrap'>
 										Критерий
 									</th>
-									<th className='border border-neutral-200 px-3 py-2 text-left text-xs font-medium'>
+									<th className='border border-neutral-200 px-3 py-2 text-left text-xs font-medium whitespace-nowrap'>
 										Рекомендация
 									</th>
 								</tr>
@@ -250,27 +303,27 @@ export default function ResultsTable({ isBusinessMode, data }: ResultsTableProps
 													? 'bg-green-50'
 													: ''
 											}`}>
-											<td className='border border-neutral-200 px-3 py-2 text-sm'>
+											<td className='border border-neutral-200 w-fit px-3 py-2 text-sm whitespace-break-spaces'>
 												{item.name}
 											</td>
-											<td className='border border-neutral-200 px-3 py-2 text-sm'>
+											<td className='border border-neutral-200 px-3 py-2 text-sm whitespace-nowrap'>
 												{iiAfter.toFixed(2)}
 											</td>
-											<td className='border border-neutral-200 px-3 py-2 text-sm'>
+											<td className='border border-neutral-200 px-3 py-2 text-sm whitespace-nowrap'>
 												{item.scenario.delta_ii > 0 ? '+' : ''}
 												{item.scenario.delta_ii.toFixed(2)}
 											</td>
-											<td className='border border-neutral-200 px-3 py-2 text-sm'>
+											<td className='border border-neutral-200 px-3 py-2 text-sm whitespace-nowrap'>
 												{siAfter.toFixed(2)}
 											</td>
-											<td className='border border-neutral-200 px-3 py-2 text-sm'>
+											<td className='border border-neutral-200 px-3 py-2 text-sm whitespace-nowrap'>
 												{item.scenario.delta_si > 0 ? '+' : ''}
 												{item.scenario.delta_si.toFixed(2)}
 											</td>
-											<td className='border border-neutral-200 px-3 py-2 text-sm'>
+											<td className='border border-neutral-200 px-3 py-2 text-sm whitespace-nowrap'>
 												{criterion}
 											</td>
-											<td className='border border-neutral-200 px-3 py-2 text-sm font-medium'>
+											<td className='border border-neutral-200 px-3 py-2 text-sm font-medium whitespace-nowrap'>
 												{getRecommendation(item.key, blogger)}
 											</td>
 										</tr>
@@ -349,6 +402,114 @@ export default function ResultsTable({ isBusinessMode, data }: ResultsTableProps
 			</div>
 		);
 	};
+
+	// Компонент справки по метрикам
+	const MetricsHelp = () => (
+		<div className='mt-6 p-4 border border-blue-200 rounded-lg bg-blue-50'>
+			<div className='flex justify-between items-center mb-4'>
+				<h3 className='text-lg font-semibold'>Справка по метрикам и индексам</h3>
+				<button
+					onClick={() => setShowMetricsHelp(false)}
+					className='text-blue-600 hover:text-blue-800'>
+					<svg
+						className='w-5 h-5'
+						fill='none'
+						stroke='currentColor'
+						viewBox='0 0 24 24'
+						xmlns='http://www.w3.org/2000/svg'>
+						<path
+							strokeLinecap='round'
+							strokeLinejoin='round'
+							strokeWidth='2'
+							d='M6 18L18 6M6 6l12 12'></path>
+					</svg>
+				</button>
+			</div>
+
+			<div className='grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4'>
+				<div>
+					<h4 className='font-medium text-blue-700'>Основные индексы</h4>
+					<ul className='mt-2 space-y-2'>
+						<li>
+							<span className='font-medium'>II - Интегральный индекс влияния</span>
+							<p className='text-sm text-neutral-600'>
+								Комплексная оценка влияния блогера, учитывающая аудиторию,
+								вовлеченность и активность.
+							</p>
+						</li>
+						<li>
+							<span className='font-medium'>SI - Индекс устойчивости</span>
+							<p className='text-sm text-neutral-600'>
+								Оценка стабильности и предсказуемости показателей влияния блогера.
+							</p>
+						</li>
+					</ul>
+				</div>
+
+				<div>
+					<h4 className='font-medium text-blue-700'>Аудитория</h4>
+					<ul className='mt-2 space-y-2'>
+						<li>
+							<span className='font-medium'>FR - Соотношение подписчиков</span>
+							<p className='text-sm text-neutral-600'>
+								Показатель эффективности аудитории относительно других блогеров в
+								категории.
+							</p>
+						</li>
+						<li>
+							<span className='font-medium'>GR - Темп роста</span>
+							<p className='text-sm text-neutral-600'>
+								Процент прироста аудитории за определенный период.
+							</p>
+						</li>
+					</ul>
+				</div>
+
+				<div>
+					<h4 className='font-medium text-blue-700'>Вовлеченность</h4>
+					<ul className='mt-2 space-y-2'>
+						<li>
+							<span className='font-medium'>ER - Коэффициент вовлеченности</span>
+							<p className='text-sm text-neutral-600'>
+								Процентное отношение суммы взаимодействий (лайки, комментарии,
+								репосты) к количеству подписчиков.
+							</p>
+						</li>
+						<li>
+							<span className='font-medium'>RA - Средний охват</span>
+							<p className='text-sm text-neutral-600'>
+								Среднее количество уникальных просмотров публикаций.
+							</p>
+						</li>
+					</ul>
+				</div>
+
+				<div>
+					<h4 className='font-medium text-blue-700'>Активность</h4>
+					<ul className='mt-2 space-y-2'>
+						<li>
+							<span className='font-medium'>PA - Частота публикаций</span>
+							<p className='text-sm text-neutral-600'>
+								Среднее количество публикаций в неделю.
+							</p>
+						</li>
+						<li>
+							<span className='font-medium'>SA - Стабильность активности</span>
+							<p className='text-sm text-neutral-600'>
+								Показатель регулярности публикаций и их качества.
+							</p>
+						</li>
+						<li>
+							<span className='font-medium'>M - Упоминания</span>
+							<p className='text-sm text-neutral-600'>
+								Количество упоминаний блогера другими пользователями и СМИ.
+							</p>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	);
 
 	// Рендеринг для одного блогера
 	if (!isBusinessMode) {
@@ -487,36 +648,81 @@ export default function ResultsTable({ isBusinessMode, data }: ResultsTableProps
 	// Рендеринг для бизнес-режима (несколько блогеров)
 	return (
 		<div className='w-full max-w-6xl mx-auto bg-white p-6 rounded-lg shadow-[0_0_0_1px_rgba(0,0,0,0.05)]'>
-			<h2 className='text-2xl font-semibold mb-6'>
-				Результаты сравнительного анализа блогеров
-			</h2>
+			<div className='flex justify-between items-center mb-6'>
+				<h2 className='text-2xl font-semibold'>
+					Результаты сравнительного анализа блогеров
+				</h2>
+				<button
+					onClick={exportComparisonData}
+					disabled={isSaving}
+					className='bg-gradient-to-t from-blue-600 to-blue-500 hover:from-[#1056ec] hover:to-[#2472e7] shadow-[0_1px_2px_0px_inset_rgba(255,255,255,0.4)] text-white py-2 px-4 rounded-lg text-sm flex items-center transition-colors'>
+					{isSaving ? (
+						<>
+							<svg
+								className='animate-spin -ml-1 mr-2 mb-[1px] h-4 w-4 text-white'
+								xmlns='http://www.w3.org/2000/svg'
+								fill='none'
+								viewBox='0 0 24 24'>
+								<circle
+									className='opacity-25'
+									cx='12'
+									cy='12'
+									r='10'
+									stroke='currentColor'
+									strokeWidth='4'></circle>
+								<path
+									className='opacity-75'
+									fill='currentColor'
+									d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'></path>
+							</svg>
+							Сохранение...
+						</>
+					) : (
+						<>
+							<svg
+								className='w-4 h-4 mr-2'
+								fill='none'
+								stroke='currentColor'
+								viewBox='0 0 24 24'
+								xmlns='http://www.w3.org/2000/svg'>
+								<path
+									strokeLinecap='round'
+									strokeLinejoin='round'
+									strokeWidth='2'
+									d='M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4'></path>
+							</svg>
+							Экспорт данных (JSON)
+						</>
+					)}
+				</button>
+			</div>
 
 			<div className='mb-6'>
 				<h3 className='text-lg font-semibold mb-3'>Ранжирование по влиянию</h3>
-				<div className='overflow-x-auto'>
-					<table className='min-w-full divide-y divide-neutral-200'>
+				<div className='overflow-x-auto border border-neutral-200 rounded-lg'>
+					<table className='min-w-full divide-y divide-neutral-200 table-fixed w-full'>
 						<thead className='bg-neutral-50'>
 							<tr>
-								<th className='px-3 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider'>
+								<th className='px-3 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider whitespace-break-spaces w-[60px]'>
 									Ранг
 								</th>
-								<th className='px-3 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider'>
+								<th className='px-3 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider whitespace-break-spaces'>
 									Блогер
 								</th>
-								<th className='px-3 py-3 text-right text-xs font-medium text-neutral-500 uppercase tracking-wider'>
-									Индекс влияния (II)
+								<th className='px-3 py-3 text-center text-xs font-medium text-neutral-500 uppercase tracking-wider whitespace-break-spaces w-[80px]'>
+									II
 								</th>
-								<th className='px-3 py-3 text-right text-xs font-medium text-neutral-500 uppercase tracking-wider'>
-									Индекс устойчивости (SI)
+								<th className='px-3 py-3 text-center text-xs font-medium text-neutral-500 uppercase tracking-wider whitespace-break-spaces w-[80px]'>
+									SI
 								</th>
-								<th className='px-3 py-3 text-right text-xs font-medium text-neutral-500 uppercase tracking-wider'>
-									Соотношение подписчиков
+								<th className='px-3 py-3 text-center text-xs font-medium text-neutral-500 uppercase tracking-wider whitespace-break-spaces w-[80px]'>
+									FR
 								</th>
-								<th className='px-3 py-3 text-right text-xs font-medium text-neutral-500 uppercase tracking-wider'>
-									Вовлеченность
+								<th className='px-3 py-3 text-center text-xs font-medium text-neutral-500 uppercase tracking-wider whitespace-break-spaces w-[80px]'>
+									ER
 								</th>
-								<th className='px-3 py-3 text-right text-xs font-medium text-neutral-500 uppercase tracking-wider'>
-									Охват
+								<th className='px-3 py-3 text-center text-xs font-medium text-neutral-500 uppercase tracking-wider whitespace-break-spaces w-[80px]'>
+									RA
 								</th>
 							</tr>
 						</thead>
@@ -529,12 +735,12 @@ export default function ResultsTable({ isBusinessMode, data }: ResultsTableProps
 									<tr
 										key={blogger.blogger.id}
 										className={index % 2 === 0 ? 'bg-white' : 'bg-neutral-50'}>
-										<td className='px-3 py-3 whitespace-nowrap'>
-											<span className='px-2 py-1 text-xs inline-flex leading-5 font-semibold rounded-full bg-blue-100 text-blue-800'>
+										<td className='px-3 py-3 whitespace-nowrap w-[60px]'>
+											<span className='w-7 h-7 text-xs flex items-center justify-center leading-5 font-semibold rounded-full bg-blue-100 text-blue-800'>
 												{rankByII}
 											</span>
 										</td>
-										<td className='px-3 py-3 whitespace-nowrap'>
+										<td className='px-3 py-3 whitespace-break-spaces'>
 											<div className='flex items-center'>
 												<div>
 													<div className='text-sm font-medium text-neutral-900'>
@@ -547,23 +753,23 @@ export default function ResultsTable({ isBusinessMode, data }: ResultsTableProps
 												</div>
 											</div>
 										</td>
-										<td className='px-3 py-3 whitespace-nowrap text-right'>
+										<td className='px-3 py-3 whitespace-nowrap text-center'>
 											<div className='text-sm font-medium text-blue-600'>
 												{blogger.metrics.influence_index.toFixed(2)}
 											</div>
 										</td>
-										<td className='px-3 py-3 whitespace-nowrap text-right'>
+										<td className='px-3 py-3 whitespace-nowrap text-center'>
 											<div className='text-sm font-medium text-purple-600'>
 												{blogger.metrics.sustainability_index.toFixed(2)}
 											</div>
 										</td>
-										<td className='px-3 py-3 whitespace-nowrap text-right text-sm'>
+										<td className='px-3 py-3 whitespace-nowrap text-center text-sm'>
 											{blogger.metrics.followers_ratio.toFixed(2)}
 										</td>
-										<td className='px-3 py-3 whitespace-nowrap text-right text-sm'>
+										<td className='px-3 py-3 whitespace-nowrap text-center text-sm'>
 											{blogger.metrics.engagement_rate.toFixed(2)}%
 										</td>
-										<td className='px-3 py-3 whitespace-nowrap text-right text-sm'>
+										<td className='px-3 py-3 whitespace-nowrap text-center text-sm'>
 											{blogger.metrics.avg_reach.toLocaleString()}
 										</td>
 									</tr>
@@ -576,47 +782,102 @@ export default function ResultsTable({ isBusinessMode, data }: ResultsTableProps
 
 			<div className='mb-6'>
 				<h3 className='text-lg font-semibold mb-3'>Сравнение ключевых метрик</h3>
-				<div className='overflow-hidden border rounded-lg'>
-					<div className='p-4 bg-neutral-50 border-b'>
-						<div className='grid grid-cols-7 gap-4 text-xs font-medium text-neutral-500 uppercase'>
-							<div>Блогер</div>
-							<div className='text-right'>FR</div>
-							<div className='text-right'>GR</div>
-							<div className='text-right'>ER</div>
-							<div className='text-right'>PA</div>
-							<div className='text-right'>RA</div>
-							<div className='text-right'>M</div>
-						</div>
-					</div>
-					<div className='divide-y'>
-						{data.map((blogger) => (
-							<div
-								key={blogger.blogger.id}
-								className='p-4'>
-								<div className='grid grid-cols-7 gap-4 text-sm'>
-									<div className='font-medium'>{blogger.blogger.name}</div>
-									<div className='text-right'>
-										{blogger.metrics.followers_ratio.toFixed(2)}
-									</div>
-									<div className='text-right'>
-										{blogger.metrics.growth_rate.toFixed(2)}%
-									</div>
-									<div className='text-right'>
-										{blogger.metrics.engagement_rate.toFixed(2)}%
-									</div>
-									<div className='text-right'>
-										{blogger.metrics.post_frequency.toFixed(1)}
-									</div>
-									<div className='text-right'>
-										{blogger.metrics.avg_reach.toLocaleString()}
-									</div>
-									<div className='text-right'>{blogger.metrics.mentions}</div>
-								</div>
-							</div>
-						))}
-					</div>
+
+				<div className='overflow-x-auto border border-neutral-200 rounded-lg'>
+					<table className='min-w-full divide-y divide-neutral-200 table-fixed w-full'>
+						<thead className='bg-neutral-50'>
+							<tr>
+								<th className='px-3 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider whitespace-break-spaces'>
+									Блогер
+								</th>
+								<th className='px-3 py-3 text-center text-xs font-medium text-neutral-500 uppercase tracking-wider whitespace-break-spaces w-[80px]'>
+									FR
+								</th>
+								<th className='px-3 py-3 text-center text-xs font-medium text-neutral-500 uppercase tracking-wider whitespace-break-spaces w-[80px]'>
+									GR
+								</th>
+								<th className='px-3 py-3 text-center text-xs font-medium text-neutral-500 uppercase tracking-wider whitespace-break-spaces w-[80px]'>
+									ER
+								</th>
+								<th className='px-3 py-3 text-center text-xs font-medium text-neutral-500 uppercase tracking-wider whitespace-break-spaces w-[80px]'>
+									PA
+								</th>
+								<th className='px-3 py-3 text-center text-xs font-medium text-neutral-500 uppercase tracking-wider whitespace-break-spaces w-[80px]'>
+									RA
+								</th>
+								<th className='px-3 py-3 text-center text-xs font-medium text-neutral-500 uppercase tracking-wider whitespace-break-spaces w-[80px]'>
+									M
+								</th>
+							</tr>
+						</thead>
+						<tbody className='bg-white divide-y divide-neutral-200'>
+							{data.map((blogger, index) => {
+								return (
+									<tr
+										key={blogger.blogger.id}
+										className={index % 2 === 0 ? 'bg-white' : 'bg-neutral-50'}>
+										<td className='px-3 py-3 whitespace-break-spaces'>
+											<div className='flex items-center'>
+												<div>
+													<div className='text-sm font-medium text-neutral-900'>
+														{blogger.blogger.name}
+													</div>
+													<div className='text-xs text-neutral-500'>
+														{blogger.blogger.platform} •{' '}
+														{blogger.blogger.category}
+													</div>
+												</div>
+											</div>
+										</td>
+										<td className='px-3 py-3 whitespace-nowrap text-center'>
+											<div className='text-sm font-medium text-blue-600'>
+												{blogger.metrics.followers_ratio.toFixed(2)}
+											</div>
+										</td>
+										<td className='px-3 py-3 whitespace-nowrap text-center'>
+											<div className='text-sm font-medium text-purple-600'>
+												{blogger.metrics.growth_rate.toFixed(2)}%
+											</div>
+										</td>
+										<td className='px-3 py-3 whitespace-nowrap text-center'>
+											{blogger.metrics.engagement_rate.toFixed(2)}%
+										</td>
+										<td className='px-3 py-3 whitespace-nowrap text-center'>
+											{blogger.metrics.post_frequency.toFixed(1)}
+										</td>
+										<td className='px-3 py-3 whitespace-nowrap text-center'>
+											{blogger.metrics.avg_reach.toLocaleString()}
+										</td>
+										<td className='px-3 py-3 whitespace-nowrap text-center'>
+											{blogger.metrics.mentions.toFixed(3)}
+										</td>
+									</tr>
+								);
+							})}
+						</tbody>
+					</table>
 				</div>
 			</div>
+
+			<button
+				onClick={() => setShowMetricsHelp(!showMetricsHelp)}
+				className='text-blue-600 hover:text-blue-800 text-sm flex items-center'>
+				<svg
+					className='w-4 h-4 mr-1'
+					fill='none'
+					stroke='currentColor'
+					viewBox='0 0 24 24'
+					xmlns='http://www.w3.org/2000/svg'>
+					<path
+						strokeLinecap='round'
+						strokeLinejoin='round'
+						strokeWidth='2'
+						d='M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'></path>
+				</svg>
+				Справка по метрикам
+			</button>
+
+			{showMetricsHelp && <MetricsHelp />}
 		</div>
 	);
 }
