@@ -15,6 +15,7 @@ const createEmptyBlogger = (): BloggerInputData => ({
 	platform: '',
 	category: '',
 	subscribers: '' as unknown as number,
+	subscriptions: '' as unknown as number,
 	followers_growth: '' as unknown as number,
 	posts: '' as unknown as number,
 	post_frequency: '' as unknown as number,
@@ -31,6 +32,7 @@ const createEmptyBlogger = (): BloggerInputData => ({
 const requiredFields: (keyof BloggerInputData)[] = [
 	'name',
 	'subscribers',
+	'subscriptions',
 	'followers_growth',
 	'posts',
 	'post_frequency',
@@ -582,6 +584,27 @@ const InputForm = forwardRef<InputFormHandles, InputFormProps>(
 									placeholder='Например, 10000'
 								/>
 								{shouldShowError(index, 'subscribers') && (
+									<p className='text-red-500 text-xs mt-1'>Обязательное поле</p>
+								)}
+							</div>
+
+							<div className='flex flex-col mb-2'>
+								<label className='text-sm font-medium mb-1'>
+									Количество подписок <span className='text-red-500'>*</span>
+								</label>
+								<input
+									value={blogger.subscriptions}
+									onChange={(e) =>
+										handleChange(index, 'subscriptions', e.target.value)
+									}
+									className={`p-2 border border-neutral-300 rounded-md bg-white transition-colors ${
+										shouldShowError(index, 'subscriptions')
+											? errorFieldStyle
+											: ''
+									}`}
+									placeholder='Например, 500'
+								/>
+								{shouldShowError(index, 'subscriptions') && (
 									<p className='text-red-500 text-xs mt-1'>Обязательное поле</p>
 								)}
 							</div>

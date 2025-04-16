@@ -6,6 +6,7 @@ export interface BloggerData {
 	platform: string;
 	category: string;
 	subscribers: number;
+	subscriptions: number;
 	followers_growth: number; // Прирост подписчиков за период
 	posts: number; // Количество постов за период
 	post_frequency: number; // Частота постов (постов в неделю)
@@ -26,6 +27,7 @@ export interface BloggerInputData {
 	platform: string;
 	category: string;
 	subscribers: number;
+	subscriptions: number;
 	followers_growth: number;
 	posts: number;
 	post_frequency: number;

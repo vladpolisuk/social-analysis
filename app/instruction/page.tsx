@@ -594,17 +594,50 @@ export default function Instruction() {
 							if (el) sectionsRef.current.set('metrics', el);
 						}}
 						className='mb-8 pt-6'>
-						<h2 className='text-2xl font-semibold mb-4'>Метрики и показатели</h2>
-						<div className='bg-white rounded-lg p-6 shadow-[0_0_0_1px_rgba(0,0,0,0.05)]'>
-							<p className='mb-4'>
-								Для анализа влияния блогеров используются следующие метрики и
-								рассчитываемые показатели:
-							</p>
+						<h2 className='text-2xl font-semibold mb-4'>Метрики оценки и индексы</h2>
 
-							<h3 className='font-semibold text-lg mb-3'>
-								Основные метрики (вводятся пользователем):
-							</h3>
-							<div className='grid md:grid-cols-2 gap-4 mb-6'>
+						<div className='bg-white rounded-lg p-6 shadow-[0_0_0_1px_rgba(0,0,0,0.05)]'>
+							<h3 className='text-lg font-semibold mb-4'>Основные метрики</h3>
+
+							<div className='space-y-5 mb-6'>
+								<div>
+									<h4 className='font-medium mb-1.5'>
+										Followers Ratio (FR) - Соотношение подписчиков
+									</h4>
+									<p className='text-neutral-700 mb-1'>
+										Характеризует отношение количества подписчиков к количеству
+										подписок блогера.
+									</p>
+									<p className='text-sm text-neutral-500 mb-1'>
+										<span className='font-medium'>Формула:</span> FR =
+										Количество подписчиков / Количество подписок
+									</p>
+									<p className='text-sm text-neutral-500'>
+										<span className='font-medium'>Значение:</span> Показывает
+										влиятельность блогера. Высокое значение FR указывает на то,
+										что на блогера подписано больше людей, чем он сам подписан
+										на других.
+									</p>
+								</div>
+
+								<div>
+									<h4 className='font-medium mb-1.5'>
+										Growth Rate (GR) - Темп роста аудитории
+									</h4>
+									<p className='text-neutral-700 mb-1'>
+										Определяет процентный прирост подписчиков за выбранный
+										период.
+									</p>
+									<p className='text-sm text-neutral-500 mb-1'>
+										<span className='font-medium'>Формула:</span> GR = (Прирост
+										подписчиков / Общее число подписчиков) × 100%
+									</p>
+									<p className='text-sm text-neutral-500'>
+										<span className='font-medium'>Значение:</span> Показывает
+										динамику привлечения новой аудитории.
+									</p>
+								</div>
+
 								<div className='bg-neutral-50 p-3 rounded-lg'>
 									<h4 className='font-medium mb-1'>Количество подписчиков</h4>
 									<p className='text-sm text-neutral-600'>

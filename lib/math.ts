@@ -21,24 +21,10 @@ import {
 /**
  * Рассчитывает соотношение подписчиков (FR)
  */
-function calculateFollowersRatio(subscribers: number, category: string): number {
-	// Базовые значения по категориям (средние значения подписчиков)
-	const categoryBaselines: Record<string, number> = {
-		Fashion: 50000,
-		Beauty: 40000,
-		Lifestyle: 35000,
-		Food: 30000,
-		Tech: 25000,
-		Travel: 45000,
-		Fitness: 35000,
-		Business: 20000,
-		Education: 15000,
-		Gaming: 60000,
-		Other: 30000,
-	};
-
-	const baseline = categoryBaselines[category] || 30000;
-	return subscribers / baseline;
+function calculateFollowersRatio(subscribers: number, subscriptions: number): number {
+	// Классическое представление FR: отношение подписчиков к подпискам
+	if (subscriptions === 0) return 0; // Предотвращение деления на ноль
+	return subscribers / subscriptions;
 }
 
 /**
@@ -442,7 +428,7 @@ function calculateMetrics(
 	siWeights: SIWeights,
 ): BloggerMetrics {
 	// Расчет базовых метрик
-	const followers_ratio = calculateFollowersRatio(data.subscribers, data.category);
+	const followers_ratio = calculateFollowersRatio(data.subscribers, data.subscriptions);
 	const growth_rate = calculateGrowthRate(data.subscribers, data.followers_growth);
 	const engagement_rate = calculateEngagementRate(
 		data.likes,
