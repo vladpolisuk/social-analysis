@@ -2,6 +2,7 @@
  * Библиотека математических функций для расчета показателей влияния
  */
 
+import { getCustomScenarios, getScenarioProbability } from './data';
 import {
 	BloggerAnalysisResult,
 	BloggerData,
@@ -11,6 +12,7 @@ import {
 	BusinessSettings,
 	IIWeights,
 	OptimalityWeights,
+	ScenarioData,
 	ScenarioParameters,
 	ScenarioResults,
 	SIWeights,
@@ -63,6 +65,15 @@ function calculateActivityStability(post_frequency_std: number, post_frequency: 
 function normalize(value: number, min: number, max: number): number {
 	if (max === min) return 0.5;
 	return Math.max(0, Math.min(1, (value - min) / (max - min)));
+}
+
+/**
+ * Нормализует значение в указанном диапазоне [min, max] в значение от 0 до 1
+ */
+function normalizeValue(value: number, min: number, max: number): number {
+	if (value < min) return 0;
+	if (value > max) return 1;
+	return (value - min) / (max - min);
 }
 
 /**
@@ -172,11 +183,32 @@ function simulateScenarios(
 	collaborationScenario.delta_ii = newII3 - metrics.influence_index;
 	collaborationScenario.delta_si = newSI3 - metrics.sustainability_index;
 
+	// Сценарий 4: Образовательный контент
+	const educationScenario = {
+		name: 'Образовательный контент',
+		delta_ii: 0,
+		delta_si: 0,
+		cost: settings.cost_education,
+		description: 'Добавление образовательных элементов для повышения ценности контента',
+	};
+
+	// Создаем копию метрик для сценария 4
+	const educationMetrics = { ...metrics };
+	educationMetrics.engagement_rate *= 1.3; // Увеличение вовлеченности на 30%
+	educationMetrics.avg_reach *= 1.25; // Увеличение охвата на 25%
+
+	// Рассчитываем новые индексы и разницу
+	const newII4 = calculateInfluenceIndex(educationMetrics, iiWeights);
+	const newSI4 = calculateSustainabilityIndex(educationMetrics, siWeights);
+	educationScenario.delta_ii = newII4 - metrics.influence_index;
+	educationScenario.delta_si = newSI4 - metrics.sustainability_index;
+
 	// Ранжирование сценариев по пригодности (наименьшие затраты)
 	const scenarios = [
 		{ key: 'activity_scenario', cost: activityScenario.cost },
 		{ key: 'engagement_scenario', cost: engagementScenario.cost },
 		{ key: 'collaboration_scenario', cost: collaborationScenario.cost },
+		{ key: 'education_scenario', cost: educationScenario.cost },
 	];
 
 	const suitabilityRanking = [...scenarios].sort((a, b) => a.cost - b.cost).map((s) => s.key);
@@ -186,6 +218,7 @@ function simulateScenarios(
 		{ key: 'activity_scenario', delta: activityScenario.delta_ii },
 		{ key: 'engagement_scenario', delta: engagementScenario.delta_ii },
 		{ key: 'collaboration_scenario', delta: collaborationScenario.delta_ii },
+		{ key: 'education_scenario', delta: educationScenario.delta_ii },
 	]
 		.sort((a, b) => b.delta - a.delta)
 		.map((s) => s.key);
@@ -202,16 +235,19 @@ function simulateScenarios(
 			activityScenario.delta_ii,
 			engagementScenario.delta_ii,
 			collaborationScenario.delta_ii,
+			educationScenario.delta_ii,
 		);
 		const maxDeltaSI = Math.max(
 			activityScenario.delta_si,
 			engagementScenario.delta_si,
 			collaborationScenario.delta_si,
+			educationScenario.delta_si,
 		);
 		const maxCost = Math.max(
 			activityScenario.cost,
 			engagementScenario.cost,
 			collaborationScenario.cost,
+			educationScenario.cost,
 		);
 
 		const normDeltaII = maxDeltaII > 0 ? deltaII / maxDeltaII : 0;
@@ -250,11 +286,19 @@ function simulateScenarios(
 		defaultWeights,
 	);
 
+	const educationOptimality = calculateOptimality(
+		educationScenario.delta_ii,
+		educationScenario.delta_si,
+		educationScenario.cost,
+		defaultWeights,
+	);
+
 	// Ранжирование по оптимальности
 	const optimalityRanking = [
 		{ key: 'activity_scenario', optimality: activityOptimality },
 		{ key: 'engagement_scenario', optimality: engagementOptimality },
 		{ key: 'collaboration_scenario', optimality: collaborationOptimality },
+		{ key: 'education_scenario', optimality: educationOptimality },
 	]
 		.sort((a, b) => b.optimality - a.optimality)
 		.map((s) => s.key);
@@ -266,6 +310,7 @@ function simulateScenarios(
 		activity_scenario: activityScenario,
 		engagement_scenario: engagementScenario,
 		collaboration_scenario: collaborationScenario,
+		education_scenario: educationScenario,
 		suitability_ranking: suitabilityRanking,
 		superiority_ranking: superiorityRanking,
 		optimality_ranking: optimalityRanking,
@@ -402,6 +447,7 @@ export async function analyzeForBlogger(
 			cost_activity: 0.2,
 			cost_engagement: 0.4,
 			cost_collaboration: 0.8,
+			cost_education: 0.5,
 		},
 	};
 
@@ -472,4 +518,289 @@ function average(values: number[]): number {
 	if (values.length === 0) return 0;
 	const sum = values.reduce((acc, val) => acc + val, 0);
 	return sum / values.length;
+}
+
+/**
+ * Функция для обработки динамических сценариев
+ */
+function processCustomScenario(
+	scenarioKey: string,
+	scenarioName: string,
+	metrics: BloggerMetrics,
+	settings: ScenarioParameters,
+	iiWeights: IIWeights,
+	siWeights: SIWeights,
+	costKey: string = 'cost_education', // Используем стоимость образовательного сценария по умолчанию
+): ScenarioData {
+	// По умолчанию используем логику образовательного сценария
+	const newMetrics = { ...metrics };
+
+	// Повышаем вовлеченность на 30%
+	newMetrics.engagement_rate = metrics.engagement_rate * 1.3;
+
+	// Нормализуем метрики через функцию нормализации
+	const normalizedMetrics = {
+		...newMetrics,
+		// Нормализованные значения в диапазоне [0,1]
+		followers_ratio: normalizeValue(newMetrics.followers_ratio, 0, 10),
+		growth_rate: normalizeValue(newMetrics.growth_rate, 0, 0.5),
+		engagement_rate: normalizeValue(newMetrics.engagement_rate, 0, 0.3),
+		activity_stability: normalizeValue(newMetrics.activity_stability, 0, 1),
+		post_frequency: normalizeValue(newMetrics.post_frequency, 0, 14),
+		avg_reach: normalizeValue(newMetrics.avg_reach, 0, 1),
+		mentions: normalizeValue(newMetrics.mentions, 0, 100),
+	};
+
+	// Рассчитываем новые индексы влияния
+	const newII = calculateInfluenceIndex(normalizedMetrics, iiWeights);
+	const newSI = calculateSustainabilityIndex(normalizedMetrics, siWeights);
+
+	// Создаем объект сценария
+	return {
+		name: scenarioName,
+		delta_ii: newII - metrics.influence_index,
+		delta_si: newSI - metrics.sustainability_index,
+		cost: settings[costKey as keyof ScenarioParameters] || settings.cost_education,
+		description: `Реализация сценария "${scenarioName}" с улучшением общих показателей блогера.`,
+		probability: getScenarioProbability(scenarioKey, metrics),
+	};
+}
+
+/**
+ * Рассчитывает прогностические сценарии
+ */
+export function calculateScenarios(
+	input: BloggerData,
+	metrics: BloggerMetrics,
+	settings: BloggerSettings,
+): ScenarioResults {
+	const { ii_weights, si_weights, scenario_parameters } = settings;
+
+	// Расчет метрик при сценарии "Увеличение активности"
+	const activityScenarioPostFrequency =
+		metrics.post_frequency + scenario_parameters.post_frequency_delta;
+	const activityScenarioII = calculateInfluenceIndex(
+		{
+			...metrics,
+			post_frequency: activityScenarioPostFrequency,
+		},
+		ii_weights,
+	);
+	const activityScenarioSI = calculateSustainabilityIndex(
+		{
+			...metrics,
+			post_frequency_std: metrics.post_frequency_std * 0.9, // Улучшение стабильности публикаций
+		},
+		si_weights,
+	);
+
+	// Расчет метрик при сценарии "Повышение вовлеченности"
+	const engagementScenarioER = metrics.engagement_rate + scenario_parameters.engagement_target;
+	const engagementScenarioII = calculateInfluenceIndex(
+		{
+			...metrics,
+			engagement_rate: engagementScenarioER,
+		},
+		ii_weights,
+	);
+	const engagementScenarioSI = calculateSustainabilityIndex(
+		{
+			...metrics,
+			engagement_rate_std: metrics.engagement_rate_std * 0.9, // Улучшение стабильности вовлеченности
+		},
+		si_weights,
+	);
+
+	// Расчет метрик при сценарии "Коллаборации"
+	const collaborationScenarioMentions = metrics.mentions + scenario_parameters.mentions_delta;
+	const collaborationScenarioReach = metrics.avg_reach * 1.2; // Увеличение охвата на 20%
+	const collaborationScenarioII = calculateInfluenceIndex(
+		{
+			...metrics,
+			mentions: collaborationScenarioMentions,
+			avg_reach: collaborationScenarioReach,
+		},
+		ii_weights,
+	);
+	const collaborationScenarioSI = calculateSustainabilityIndex(
+		{
+			...metrics,
+			reach_std: metrics.reach_std * 0.95, // Небольшое улучшение стабильности охвата
+		},
+		si_weights,
+	);
+
+	// Расчет метрик при сценарии "Образовательный контент"
+	const educationScenarioER = metrics.engagement_rate * 1.3; // Предполагаем, что вовлеченность вырастет на 30%
+	const educationScenarioII = calculateInfluenceIndex(
+		{
+			...metrics,
+			engagement_rate: educationScenarioER,
+		},
+		ii_weights,
+	);
+	const educationScenarioSI = calculateSustainabilityIndex(
+		{
+			...metrics,
+			engagement_rate_std: metrics.engagement_rate_std * 0.85, // Улучшение стабильности вовлеченности
+		},
+		si_weights,
+	);
+
+	// Дельты для каждого сценария
+	const activityScenarioDeltaII = activityScenarioII - metrics.influence_index;
+	const activityScenarioDeltaSI = activityScenarioSI - metrics.sustainability_index;
+
+	const engagementScenarioDeltaII = engagementScenarioII - metrics.influence_index;
+	const engagementScenarioDeltaSI = engagementScenarioSI - metrics.sustainability_index;
+
+	const collaborationScenarioDeltaII = collaborationScenarioII - metrics.influence_index;
+	const collaborationScenarioDeltaSI = collaborationScenarioSI - metrics.sustainability_index;
+
+	const educationScenarioDeltaII = educationScenarioII - metrics.influence_index;
+	const educationScenarioDeltaSI = educationScenarioSI - metrics.sustainability_index;
+
+	// Используем веса по умолчанию для расчета оптимальности
+	const defaultWeights: OptimalityWeights = {
+		alpha: 0.5,
+		beta: 0.3,
+		gamma: 0.2,
+	};
+
+	// Создаем объекты сценариев с вероятностями, рассчитанными на основе текущих метрик
+	const activity_scenario = {
+		name: 'Увеличение активности',
+		delta_ii: activityScenarioDeltaII,
+		delta_si: activityScenarioDeltaSI,
+		cost: scenario_parameters.cost_activity,
+		description: `Увеличить частоту публикаций с ${metrics.post_frequency.toFixed(
+			1,
+		)} до ${activityScenarioPostFrequency.toFixed(1)} постов в неделю.`,
+		probability: getScenarioProbability('activity_scenario', metrics),
+	};
+
+	const engagement_scenario = {
+		name: 'Повышение вовлеченности',
+		delta_ii: engagementScenarioDeltaII,
+		delta_si: engagementScenarioDeltaSI,
+		cost: scenario_parameters.cost_engagement,
+		description: `Увеличить показатель вовлеченности с ${(
+			metrics.engagement_rate * 100
+		).toFixed(1)}% до ${(engagementScenarioER * 100).toFixed(1)}%.`,
+		probability: getScenarioProbability('engagement_scenario', metrics),
+	};
+
+	const collaboration_scenario = {
+		name: 'Коллаборации',
+		delta_ii: collaborationScenarioDeltaII,
+		delta_si: collaborationScenarioDeltaSI,
+		cost: scenario_parameters.cost_collaboration,
+		description: `Увеличить количество упоминаний с ${metrics.mentions} до ${collaborationScenarioMentions} и расширить охват аудитории на 20%.`,
+		probability: getScenarioProbability('collaboration_scenario', metrics),
+	};
+
+	const education_scenario = {
+		name: 'Образовательный контент',
+		delta_ii: educationScenarioDeltaII,
+		delta_si: educationScenarioDeltaSI,
+		cost: scenario_parameters.cost_education,
+		description: `Внедрить образовательные элементы в контент, увеличив вовлеченность на 30% и улучшив качество обратной связи от аудитории.`,
+		probability: getScenarioProbability('education_scenario', metrics),
+	};
+
+	// Получаем все настроенные сценарии из хранилища
+	const customScenarios = getCustomScenarios();
+	const scenarioResults: { [key: string]: ScenarioData } = {};
+	const allScenarioKeys: string[] = [];
+
+	// Стандартные сценарии
+	const standardScenarios = [
+		{ key: 'activity_scenario', name: 'Увеличение активности' },
+		{ key: 'engagement_scenario', name: 'Повышение вовлеченности' },
+		{ key: 'collaboration_scenario', name: 'Коллаборации' },
+		{ key: 'education_scenario', name: 'Образовательный контент' },
+	];
+
+	// Добавляем стандартные сценарии
+	standardScenarios.forEach(({ key, name }) => {
+		const scenarioInfo = customScenarios.find(
+			(s: { name: string; isActive?: boolean }) => s.name === name,
+		);
+		if (scenarioInfo && scenarioInfo.isActive !== false) {
+			allScenarioKeys.push(key);
+
+			// Используем уже вычисленные сценарии, если они есть
+			if (key === 'activity_scenario') {
+				scenarioResults[key] = activity_scenario;
+			} else if (key === 'engagement_scenario') {
+				scenarioResults[key] = engagement_scenario;
+			} else if (key === 'collaboration_scenario') {
+				scenarioResults[key] = collaboration_scenario;
+			} else if (key === 'education_scenario') {
+				scenarioResults[key] = education_scenario;
+			}
+		}
+	});
+
+	// Добавляем пользовательские сценарии
+	customScenarios.forEach(
+		(scenario: { id: number; name: string; isActive?: boolean; description?: string }) => {
+			const isStandard = standardScenarios.some((s) => s.name === scenario.name);
+			if (!isStandard && scenario.isActive !== false) {
+				const scenarioKey = `custom_scenario_${scenario.id}`;
+				allScenarioKeys.push(scenarioKey);
+				scenarioResults[scenarioKey] = processCustomScenario(
+					scenarioKey,
+					scenario.name,
+					metrics,
+					scenario_parameters,
+					ii_weights,
+					si_weights,
+				);
+			}
+		},
+	);
+
+	// Расчет критериев для всех сценариев
+	const suitability: { [key: string]: number } = {};
+	const superiority: { [key: string]: number } = {};
+	const optimality: { [key: string]: number } = {};
+
+	// Заполняем данные для всех активных сценариев
+	allScenarioKeys.forEach((key) => {
+		const scenarioData = scenarioResults[key];
+		suitability[key] = scenarioData.delta_ii;
+		superiority[key] = scenarioData.delta_si;
+		optimality[key] =
+			defaultWeights.alpha * scenarioData.delta_ii +
+			defaultWeights.beta * scenarioData.delta_si -
+			defaultWeights.gamma * scenarioData.cost;
+	});
+
+	// Ранжирование сценариев по каждому критерию
+	const suitabilityRanking = Object.entries(suitability)
+		.sort((a, b) => b[1] - a[1])
+		.map((entry) => entry[0]);
+
+	const superiorityRanking = Object.entries(superiority)
+		.sort((a, b) => b[1] - a[1])
+		.map((entry) => entry[0]);
+
+	const optimalityRanking = Object.entries(optimality)
+		.sort((a, b) => b[1] - a[1])
+		.map((entry) => entry[0]);
+
+	// Рекомендуемый сценарий (первый по оптимальности)
+	const recommendedScenario = optimalityRanking[0] || '';
+
+	// Формируем результат
+	const result = {
+		...scenarioResults,
+		suitability_ranking: suitabilityRanking,
+		superiority_ranking: superiorityRanking,
+		optimality_ranking: optimalityRanking,
+		recommended_scenario: recommendedScenario,
+	} as ScenarioResults;
+
+	return result;
 }

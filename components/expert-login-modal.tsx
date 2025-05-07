@@ -8,7 +8,8 @@ interface ExpertLoginModalProps {
 	isOpen: boolean;
 }
 
-const EXPERT_PASSWORD = process.env.NEXT_PUBLIC_EXPERT_PASSWORD; // Здесь должен быть хеш пароля в реальном приложении
+const EXPERT_PASSWORD_KEY = 'expertPassword';
+const DEFAULT_EXPERT_PASSWORD = process.env.NEXT_PUBLIC_EXPERT_PASSWORD || 'admin123'; // Здесь должен быть хеш пароля в реальном приложении
 const EXPERT_SESSION_KEY = 'expertSession';
 const SESSION_DURATION = 24 * 60 * 60 * 1000; // 24 часа в миллисекундах
 
@@ -26,9 +27,17 @@ export default function ExpertLoginModal({ onSuccess, onCancel, isOpen }: Expert
 		}
 	}, [isOpen]);
 
+	// Получение текущего пароля
+	const getCurrentPassword = (): string => {
+		const savedPassword = localStorage.getItem(EXPERT_PASSWORD_KEY);
+		return savedPassword || DEFAULT_EXPERT_PASSWORD;
+	};
+
 	// Проверка пароля и создание сессии
 	const handleLogin = () => {
-		if (password === EXPERT_PASSWORD) {
+		const currentPassword = getCurrentPassword();
+
+		if (password === currentPassword) {
 			// Успешный вход - сохраняем сессию
 			const expiryTime = Date.now() + SESSION_DURATION;
 			localStorage.setItem(EXPERT_SESSION_KEY, expiryTime.toString());
@@ -164,5 +173,25 @@ export function checkExpertSession(): boolean {
 
 // Функция для выхода из режима эксперта
 export function logoutExpert(): void {
+	// Удаляем только ключ сессии, но сохраняем настройки сценариев
 	localStorage.removeItem(EXPERT_SESSION_KEY);
+
+	// Делаем перезагрузку страницы без параметра forceReload, чтобы перезагрузить
+	// компоненты, но сохранить данные в localStorage
+	window.location.href = '/';
+}
+
+// Функция для изменения пароля эксперта
+export function changeExpertPassword(newPassword: string): boolean {
+	if (!newPassword || newPassword.length < 6) {
+		return false;
+	}
+
+	try {
+		localStorage.setItem(EXPERT_PASSWORD_KEY, newPassword);
+		return true;
+	} catch (error) {
+		console.error('Ошибка при сохранении нового пароля:', error);
+		return false;
+	}
 }

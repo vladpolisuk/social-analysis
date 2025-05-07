@@ -1,11 +1,27 @@
 'use client';
 
-import { BloggerWithMetrics } from '@/lib/types';
-import { useState } from 'react';
+import { getCustomScenarios, getScenarioProbability } from '@/lib/data';
+import { BloggerWithMetrics, ScenarioData } from '@/lib/types';
+import { useMemo, useState } from 'react';
 
 interface ResultsTableProps {
 	isBusinessMode: boolean;
 	data: BloggerWithMetrics[] | null;
+}
+
+// Тип для пользовательского сценария
+interface CustomScenario {
+	id: number;
+	name: string;
+	isActive?: boolean;
+	description?: string;
+}
+
+// Тип для элемента сценария для отображения
+interface ScenarioItem {
+	scenario: ScenarioData;
+	name: string;
+	key: string;
 }
 
 export default function ResultsTable({ isBusinessMode, data }: ResultsTableProps) {
@@ -130,6 +146,110 @@ export default function ResultsTable({ isBusinessMode, data }: ResultsTableProps
 				: 'bg-blue-100 text-blue-800 border-blue-300';
 		};
 
+		// Получение пользовательских сценариев
+		const customScenarios = useMemo<CustomScenario[]>(() => getCustomScenarios(), []);
+
+		// Формирование списка всех сценариев для отображения
+		const allScenarios = useMemo<(ScenarioItem | null)[]>(() => {
+			// Массив стандартных сценариев
+			const standardScenarioKeys = [
+				'activity_scenario',
+				'engagement_scenario',
+				'collaboration_scenario',
+				'education_scenario',
+			];
+
+			// Формируем список стандартных сценариев с их данными
+			const standardScenarioItems = standardScenarioKeys
+				.map((key) => {
+					// Находим соответствующее имя сценария
+					let name = '';
+					switch (key) {
+						case 'activity_scenario':
+							name = 'Увеличение активности';
+							break;
+						case 'engagement_scenario':
+							name = 'Повышение вовлеченности';
+							break;
+						case 'collaboration_scenario':
+							name = 'Коллаборации';
+							break;
+						case 'education_scenario':
+							name = 'Образовательный контент';
+							break;
+					}
+
+					// Проверяем, активен ли сценарий в пользовательских настройках
+					const customScenario = customScenarios.find(
+						(s: CustomScenario) => s.name === name,
+					);
+					if (!customScenario || customScenario.isActive === false) {
+						return null;
+					}
+
+					// Формируем элемент для отображения
+					return {
+						scenario: scenarios[key as keyof typeof scenarios] as ScenarioData,
+						name,
+						key,
+					};
+				})
+				.filter(Boolean); // Фильтруем null элементы
+
+			// Добавляем пользовательские сценарии
+			const customScenarioItems = customScenarios
+				.filter((s: CustomScenario) => s.isActive !== false)
+				.filter(
+					(s: CustomScenario) =>
+						![
+							'Увеличение активности',
+							'Повышение вовлеченности',
+							'Коллаборации',
+							'Образовательный контент',
+						].includes(s.name),
+				)
+				.map((s: CustomScenario) => {
+					const key = `custom_scenario_${s.id}`;
+					return {
+						scenario: scenarios[key as keyof typeof scenarios] as ScenarioData,
+						name: s.name,
+						key,
+					};
+				})
+				.filter((item: ScenarioItem | null) => item && item.scenario); // Отображаем только если есть данные сценария
+
+			return [...standardScenarioItems, ...customScenarioItems];
+		}, [customScenarios, scenarios]);
+
+		// Функция для получения имени сценария по ключу
+		const getScenarioName = (scenarioKey: string) => {
+			const scenarioItem = allScenarios.find(
+				(item: ScenarioItem | null) => item?.key === scenarioKey,
+			);
+			if (scenarioItem) {
+				return scenarioItem.name;
+			}
+
+			// Стандартные имена для резервного варианта
+			if (scenarioKey === 'activity_scenario') return 'Активность';
+			if (scenarioKey === 'engagement_scenario') return 'Вовлеченность';
+			if (scenarioKey === 'collaboration_scenario') return 'Коллаборации';
+			if (scenarioKey === 'education_scenario') return 'Образовательный контент';
+
+			// Для пользовательских сценариев извлекаем ID
+			if (scenarioKey.startsWith('custom_scenario_')) {
+				const id = scenarioKey.replace('custom_scenario_', '');
+				const customScenario = customScenarios.find(
+					(s: CustomScenario) => s.id.toString() === id,
+				);
+				if (customScenario) {
+					return customScenario.name;
+				}
+			}
+
+			return scenarioKey;
+		};
+
 		// Функция для определения конкретных рекомендаций в зависимости от сценария
 		const getRecommendation = (scenarioKey: string, blogger: BloggerWithMetrics) => {
 			const metrics = blogger.metrics;
@@ -152,6 +272,9 @@ export default function ResultsTable({ isBusinessMode, data }: ResultsTableProps
 					const recommendedCollabs =
 						metrics.mentions < 10 ? 2 : metrics.mentions < 30 ? 3 : 4;
 					return `Сотрудничайте с ${recommendedCollabs} блогерами`;
+
+				case 'education_scenario':
+					return 'Создавайте образовательный контент';
 
 				default:
 					return 'Следуйте плану развития';
@@ -176,62 +299,54 @@ export default function ResultsTable({ isBusinessMode, data }: ResultsTableProps
 				<h4 className='text-lg font-semibold mb-4'>Сценарии улучшения влияния</h4>
 
 				<div className='grid grid-cols-3 gap-4 mb-6'>
-					{[
-						{
-							scenario: scenarios.activity_scenario,
-							name: 'Увеличение активности',
-							key: 'activity_scenario',
-						},
-						{
-							scenario: scenarios.engagement_scenario,
-							name: 'Повышение вовлеченности',
-							key: 'engagement_scenario',
-						},
-						{
-							scenario: scenarios.collaboration_scenario,
-							name: 'Коллаборации',
-							key: 'collaboration_scenario',
-						},
-					].map((item) => (
-						<div
-							key={item.key}
-							className={`border rounded-lg relative flex flex-col px-3 pb-3 pt-3.5 ${
-								scenarios.recommended_scenario === item.key
-									? 'border-green-400 bg-green-50'
-									: 'border-neutral-200 bg-white'
-							}`}>
-							{scenarios.recommended_scenario === item.key && (
-								<span className='absolute -top-3.5 left-1/2 -translate-x-1/2 px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 border border-green-300'>
-									Рекомендуется
-								</span>
-							)}
-							<div className='flex justify-between items-center mb-2'>
-								<h5 className='font-medium'>{item.name}</h5>
-							</div>
-							<div className='space-y-2 text-sm'>
-								<div className='flex justify-between'>
-									<span>Прирост II:</span>
-									<span className='font-medium text-blue-700'>
-										{item.scenario.delta_ii > 0 ? '+' : ''}
-										{item.scenario.delta_ii.toFixed(2)}
-									</span>
+					{allScenarios.map(
+						(item) =>
+							item && (
+								<div
+									key={item.key}
+									className={`border rounded-lg relative flex flex-col px-3 pb-3 pt-3.5 ${
+										scenarios.recommended_scenario === item.key
+											? 'border-green-400 bg-green-50'
+											: 'border-neutral-200 bg-white'
+									}`}>
+									{scenarios.recommended_scenario === item.key && (
+										<span className='absolute -top-3.5 left-1/2 -translate-x-1/2 px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 border border-green-300'>
+											Рекомендуется
+										</span>
+									)}
+									<div className='flex justify-between items-center mb-2'>
+										<h5 className='font-medium'>{item.name}</h5>
+										<span className='text-xs inline-block px-2 py-0.5 rounded-full bg-purple-100 text-purple-800'>
+											{item.scenario.probability ??
+												getScenarioProbability(item.key)}
+											% шанс
+										</span>
+									</div>
+									<div className='space-y-2 text-sm'>
+										<div className='flex justify-between'>
+											<span>Прирост II:</span>
+											<span className='font-medium text-blue-700'>
+												{item.scenario.delta_ii > 0 ? '+' : ''}
+												{item.scenario.delta_ii.toFixed(2)}
+											</span>
+										</div>
+										<div className='flex justify-between'>
+											<span>Прирост SI:</span>
+											<span className='font-medium text-purple-700'>
+												{item.scenario.delta_si > 0 ? '+' : ''}
+												{item.scenario.delta_si.toFixed(2)}
+											</span>
+										</div>
+										<div className='flex justify-between'>
+											<span>Стоимость:</span>
+											<span className='font-medium text-neutral-700'>
+												{item.scenario.cost.toFixed(1)}
+											</span>
+										</div>
+									</div>
 								</div>
-								<div className='flex justify-between'>
-									<span>Прирост SI:</span>
-									<span className='font-medium text-purple-700'>
-										{item.scenario.delta_si > 0 ? '+' : ''}
-										{item.scenario.delta_si.toFixed(2)}
-									</span>
-								</div>
-								<div className='flex justify-between'>
-									<span>Стоимость:</span>
-									<span className='font-medium text-neutral-700'>
-										{item.scenario.cost.toFixed(1)}
-									</span>
-								</div>
-							</div>
-						</div>
-					))}
+							),
+					)}
 				</div>
 
 				{/* Таблица рекомендаций */}
@@ -265,76 +380,60 @@ export default function ResultsTable({ isBusinessMode, data }: ResultsTableProps
 								</tr>
 							</thead>
 							<tbody>
-								{[
-									{
-										scenario: scenarios.activity_scenario,
-										name: 'Увеличение активности',
-										key: 'activity_scenario',
-									},
-									{
-										scenario: scenarios.engagement_scenario,
-										name: 'Повышение вовлеченности',
-										key: 'engagement_scenario',
-									},
-									{
-										scenario: scenarios.collaboration_scenario,
-										name: 'Коллаборации',
-										key: 'collaboration_scenario',
-									},
-								].map((item) => {
-									const iiAfter =
-										blogger.metrics.influence_index + item.scenario.delta_ii;
-									const siAfter =
-										blogger.metrics.sustainability_index +
-										item.scenario.delta_si;
-									const criterion = getCriterionForScenario(item.key);
+								{allScenarios.map(
+									(item) =>
+										item &&
+										(() => {
+											const iiAfter =
+												blogger.metrics.influence_index +
+												item.scenario.delta_ii;
+											const siAfter =
+												blogger.metrics.sustainability_index +
+												item.scenario.delta_si;
+											const criterion = getCriterionForScenario(item.key);
 
-									return (
-										<tr
-											key={item.key}
-											className={`hover:bg-${
-												item.key === 'activity_scenario'
-													? 'blue'
-													: item.key === 'engagement_scenario'
-													? 'green'
-													: 'purple'
-											}-50 ${
-												scenarios.recommended_scenario === item.key
-													? 'bg-green-50'
-													: ''
-											}`}>
-											<td className='border border-neutral-200 w-fit px-3 py-2 text-sm whitespace-break-spaces'>
-												{item.name}
-											</td>
-											<td className='border border-neutral-200 px-3 py-2 text-sm whitespace-nowrap'>
-												{iiAfter.toFixed(2)}
-											</td>
-											<td className='border border-neutral-200 px-3 py-2 text-sm whitespace-nowrap'>
-												{item.scenario.delta_ii > 0 ? '+' : ''}
-												{item.scenario.delta_ii.toFixed(2)}
-											</td>
-											<td className='border border-neutral-200 px-3 py-2 text-sm whitespace-nowrap'>
-												{siAfter.toFixed(2)}
-											</td>
-											<td className='border border-neutral-200 px-3 py-2 text-sm whitespace-nowrap'>
-												{item.scenario.delta_si > 0 ? '+' : ''}
-												{item.scenario.delta_si.toFixed(2)}
-											</td>
-											<td className='border border-neutral-200 px-3 py-2 text-sm whitespace-nowrap'>
-												{criterion}
-											</td>
-											<td className='border border-neutral-200 px-3 py-2 text-sm font-medium whitespace-nowrap'>
-												{getRecommendation(item.key, blogger)}
-											</td>
-										</tr>
-									);
-								})}
+											return (
+												<tr
+													key={item.key}
+													className={`hover:bg-neutral-50 ${
+														scenarios.recommended_scenario === item.key
+															? 'bg-green-50'
+															: ''
+													}`}>
+													<td className='border border-neutral-200 w-fit px-3 py-2 text-sm whitespace-break-spaces'>
+														{item.name}
+													</td>
+													<td className='border border-neutral-200 px-3 py-2 text-sm whitespace-nowrap'>
+														{iiAfter.toFixed(2)}
+													</td>
+													<td className='border border-neutral-200 px-3 py-2 text-sm whitespace-nowrap'>
+														{item.scenario.delta_ii > 0 ? '+' : ''}
+														{item.scenario.delta_ii.toFixed(2)}
+													</td>
+													<td className='border border-neutral-200 px-3 py-2 text-sm whitespace-nowrap'>
+														{siAfter.toFixed(2)}
+													</td>
+													<td className='border border-neutral-200 px-3 py-2 text-sm whitespace-nowrap'>
+														{item.scenario.delta_si > 0 ? '+' : ''}
+														{item.scenario.delta_si.toFixed(2)}
+													</td>
+													<td className='border border-neutral-200 px-3 py-2 text-sm whitespace-nowrap'>
+														{criterion}
+													</td>
+													<td className='border border-neutral-200 px-3 py-2 text-sm font-medium whitespace-nowrap'>
+														{getRecommendation(item.key, blogger)}
+													</td>
+												</tr>
+											);
+										})(),
+								)}
 							</tbody>
 						</table>
 					</div>
 				</div>
 
-				<div className='grid grid-cols-3 gap-4 text-sm'>
+				{/* Ранжирование сценариев */}
+				<div className='grid grid-cols-3 gap-4 mt-6'>
 					<div>
 						<div className='font-medium mb-1'>По пригодности:</div>
 						<ol className='list-decimal list-inside'>
@@ -346,11 +445,7 @@ export default function ResultsTable({ isBusinessMode, data }: ResultsTableProps
 										className={`px-2 py-0.5 rounded-md ${getBadgeColor(
 											scenarioKey,
 										)}`}>
-										{scenarioKey === 'activity_scenario'
-											? 'Активность'
-											: scenarioKey === 'engagement_scenario'
-											? 'Вовлеченность'
-											: 'Коллаборации'}
+										{getScenarioName(scenarioKey)}
 									</span>
 								</li>
 							))}
@@ -367,16 +462,13 @@ export default function ResultsTable({ isBusinessMode, data }: ResultsTableProps
 										className={`px-2 py-0.5 rounded-md ${getBadgeColor(
 											scenarioKey,
 										)}`}>
-										{scenarioKey === 'activity_scenario'
-											? 'Активность'
-											: scenarioKey === 'engagement_scenario'
-											? 'Вовлеченность'
-											: 'Коллаборации'}
+										{getScenarioName(scenarioKey)}
 									</span>
 								</li>
 							))}
 						</ol>
 					</div>
+
 					<div>
 						<div className='font-medium mb-1'>По оптимальности:</div>
 						<ol className='list-decimal list-inside'>
@@ -388,11 +480,7 @@ export default function ResultsTable({ isBusinessMode, data }: ResultsTableProps
 										className={`px-2 py-0.5 rounded-md ${getBadgeColor(
 											scenarioKey,
 										)}`}>
-										{scenarioKey === 'activity_scenario'
-											? 'Активность'
-											: scenarioKey === 'engagement_scenario'
-											? 'Вовлеченность'
-											: 'Коллаборации'}
+										{getScenarioName(scenarioKey)}
 									</span>
 								</li>
 							))}

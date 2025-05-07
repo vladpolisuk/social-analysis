@@ -7,13 +7,15 @@ import ExpertLoginModal, { checkExpertSession } from './expert-login-modal';
 interface ModeSelectorProps {
 	isBusinessMode: boolean;
 	isExpertMode: boolean;
-	onModeChange: (mode: string, isExpert: boolean) => void;
+	isAdminMode?: boolean;
+	onModeChange: (mode: string, isExpert: boolean, isAdmin?: boolean) => void;
 	hasUserInput?: boolean; // Флаг, указывающий, есть ли введенные пользователем данные
 }
 
 export default function ModeSelector({
 	isBusinessMode,
 	isExpertMode,
+	isAdminMode = false,
 	onModeChange,
 	hasUserInput = false, // По умолчанию считаем, что пользователь ничего не ввел
 }: ModeSelectorProps) {
@@ -22,37 +24,46 @@ export default function ModeSelector({
 	const [pendingModeChange, setPendingModeChange] = useState<{
 		mode: string;
 		isExpert: boolean;
+		isAdmin?: boolean;
 	} | null>(null);
 
 	// Обработчик нажатия на кнопку переключения режима
-	const handleModeButtonClick = (mode: string, isExpert: boolean) => {
+	const handleModeButtonClick = (
+		mode: string,
+		isExpert: boolean,
+		isAdmin: boolean = isAdminMode,
+	) => {
 		// Если выбран тот же режим, что и сейчас - ничего не делаем
-		if ((mode === 'business') === isBusinessMode && isExpert === isExpertMode) {
+		if (
+			(mode === 'business') === isBusinessMode &&
+			isExpert === isExpertMode &&
+			isAdmin === isAdminMode
+		) {
 			return;
 		}
 
-		// Если пользователь хочет включить режим эксперта
-		if (isExpert && !isExpertMode) {
+		// Если пользователь хочет включить режим эксперта или админа
+		if ((isExpert && !isExpertMode) || (isAdmin && !isAdminMode)) {
 			// Если уже есть активная сессия
 			if (checkExpertSession()) {
 				// Сразу меняем режим
-				directModeChange(mode, isExpert);
+				directModeChange(mode, isExpert, isAdmin);
 			} else {
 				// Иначе показываем модальное окно входа
-				setPendingModeChange({ mode, isExpert });
+				setPendingModeChange({ mode, isExpert, isAdmin });
 				setShowLoginModal(true);
 			}
 			return;
 		}
 
-		// Если пользователь хочет выключить режим эксперта
-		if (!isExpert && isExpertMode) {
+		// Если пользователь хочет выключить режим эксперта или админа
+		if ((!isExpert && isExpertMode) || (!isAdmin && isAdminMode)) {
 			// Спрашиваем подтверждение только если есть введенные данные
 			if (hasUserInput) {
-				setPendingModeChange({ mode, isExpert });
+				setPendingModeChange({ mode, isExpert, isAdmin });
 				setShowConfirmModal(true);
 			} else {
-				directModeChange(mode, isExpert);
+				directModeChange(mode, isExpert, isAdmin);
 			}
 			return;
 		}
@@ -60,23 +71,27 @@ export default function ModeSelector({
 		// Если меняется только режим (бизнес/блогер)
 		if (hasUserInput) {
 			// Если есть данные, спрашиваем подтверждение
-			setPendingModeChange({ mode, isExpert });
+			setPendingModeChange({ mode, isExpert, isAdmin });
 			setShowConfirmModal(true);
 		} else {
 			// Иначе сразу меняем режим
-			directModeChange(mode, isExpert);
+			directModeChange(mode, isExpert, isAdmin);
 		}
 	};
 
 	// Прямое изменение режима без подтверждения
-	const directModeChange = (mode: string, isExpert: boolean) => {
-		onModeChange(mode, isExpert);
+	const directModeChange = (mode: string, isExpert: boolean, isAdmin: boolean = isAdminMode) => {
+		onModeChange(mode, isExpert, isAdmin);
 	};
 
 	// Подтверждение смены режима
 	const confirmModeChange = () => {
 		if (pendingModeChange) {
-			directModeChange(pendingModeChange.mode, pendingModeChange.isExpert);
+			directModeChange(
+				pendingModeChange.mode,
+				pendingModeChange.isExpert,
+				pendingModeChange.isAdmin,
+			);
 		}
 		// Закрываем модальное окно и сбрасываем ожидающее изменение
 		setShowConfirmModal(false);
@@ -92,7 +107,11 @@ export default function ModeSelector({
 	// Успешный вход в режим эксперта
 	const handleLoginSuccess = () => {
 		if (pendingModeChange) {
-			directModeChange(pendingModeChange.mode, pendingModeChange.isExpert);
+			directModeChange(
+				pendingModeChange.mode,
+				pendingModeChange.isExpert,
+				pendingModeChange.isAdmin,
+			);
 		}
 		setShowLoginModal(false);
 		setPendingModeChange(null);
@@ -102,6 +121,11 @@ export default function ModeSelector({
 	const handleLoginCancel = () => {
 		setShowLoginModal(false);
 		setPendingModeChange(null);
+	};
+
+	// Переключатель режима админа
+	const toggleAdminMode = () => {
+		handleModeButtonClick(isBusinessMode ? 'business' : 'blogger', isExpertMode, !isAdminMode);
 	};
 
 	return (
@@ -130,30 +154,55 @@ export default function ModeSelector({
 						</button>
 					</div>
 
-					<button
-						className={`px-4 w-[150px] flex items-center justify-center gap-1.5 py-2 rounded-lg transition-colors ${
-							isExpertMode
-								? 'bg-gradient-to-t from-purple-700 to-purple-500 hover:from-[#7100bd] hover:to-[#9618f0] shadow-[0_1px_2px_0px_inset_rgba(255,255,255,0.4)] text-white'
-								: 'bg-neutral-200 text-neutral-800 hover:bg-neutral-300'
-						}`}
-						onClick={() =>
-							handleModeButtonClick(
-								isBusinessMode ? 'business' : 'blogger',
-								!isExpertMode,
-							)
-						}>
-						{isExpertMode ? 'Выйти' : 'Эксперт'}
-						<Image
-							src='/settings.svg'
-							alt='settings'
-							width={20}
-							height={20}
-							draggable={false}
-							className={`w-5 h-5 select-none opacity-60 mb-[1px] ${
-								isExpertMode ? 'invert opacity-100' : ''
+					<div className='flex gap-2'>
+						<button
+							className={`px-4 w-[150px] flex items-center justify-center gap-1.5 py-2 rounded-lg transition-colors ${
+								isExpertMode
+									? 'bg-gradient-to-t from-purple-700 to-purple-500 hover:from-[#7100bd] hover:to-[#9618f0] shadow-[0_1px_2px_0px_inset_rgba(255,255,255,0.4)] text-white'
+									: 'bg-neutral-200 text-neutral-800 hover:bg-neutral-300'
 							}`}
-						/>
-					</button>
+							onClick={() =>
+								handleModeButtonClick(
+									isBusinessMode ? 'business' : 'blogger',
+									!isExpertMode,
+									isAdminMode,
+								)
+							}>
+							{isExpertMode ? 'Выйти' : 'Эксперт'}
+							<Image
+								src='/settings.svg'
+								alt='settings'
+								width={20}
+								height={20}
+								draggable={false}
+								className={`w-5 h-5 select-none opacity-60 mb-[1px] ${
+									isExpertMode ? 'invert opacity-100' : ''
+								}`}
+							/>
+						</button>
+
+						{isExpertMode && (
+							<button
+								className={`px-4 w-[150px] flex items-center justify-center gap-1.5 py-2 rounded-lg transition-colors ${
+									isAdminMode
+										? 'bg-gradient-to-t from-red-700 to-red-500 hover:from-[#b71c1c] hover:to-[#ef5350] shadow-[0_1px_2px_0px_inset_rgba(255,255,255,0.4)] text-white'
+										: 'bg-neutral-200 text-neutral-800 hover:bg-neutral-300'
+								}`}
+								onClick={toggleAdminMode}>
+								{isAdminMode ? 'Выйти' : 'Админ'}
+								<Image
+									src='/admin.svg'
+									alt='admin'
+									width={20}
+									height={20}
+									draggable={false}
+									className={`w-5 h-5 select-none opacity-60 mb-[1px] ${
+										isAdminMode ? 'invert opacity-100' : ''
+									}`}
+								/>
+							</button>
+						)}
+					</div>
 				</div>
 			</div>
 

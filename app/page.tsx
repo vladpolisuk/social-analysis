@@ -1,5 +1,7 @@
 'use client';
 
+import AdminPanel from '@/components/admin-panel';
+import { checkExpertSession } from '@/components/expert-login-modal';
 import ExpertSettings from '@/components/expert-settings';
 import InputForm from '@/components/input-form';
 import ModeSelector from '@/components/mode-selector';
@@ -13,24 +15,37 @@ import {
 	BloggerWithMetrics,
 	BusinessSettings,
 } from '@/lib/types';
-import { useRef, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 export default function Home() {
 	const [isBusinessMode, setIsBusinessMode] = useState(true);
 	const [isExpertMode, setIsExpertMode] = useState(false);
+	const [isAdminMode, setIsAdminMode] = useState(false);
 	const [showResults, setShowResults] = useState(false);
 	const [results, setResults] = useState<BloggerWithMetrics[] | null>(null);
 	const [hasUserInput, setHasUserInput] = useState(false);
+	const searchParams = useSearchParams();
 
 	// Ссылка на форму для сброса полей
 	const inputFormRef = useRef<{ resetForm: () => void; checkIfEmpty: () => boolean } | null>(
 		null,
 	);
 
-	const handleModeChange = (mode: string, isExpert: boolean) => {
+	// Check for admin mode in URL parameters on component mount
+	useEffect(() => {
+		const admin = searchParams.get('admin');
+		if (admin === 'true' && checkExpertSession()) {
+			setIsExpertMode(true);
+			setIsAdminMode(true);
+		}
+	}, [searchParams]);
+
+	const handleModeChange = (mode: string, isExpert: boolean, isAdmin: boolean = false) => {
 		setIsBusinessMode(mode === 'business');
 		setIsExpertMode(isExpert);
+		setIsAdminMode(isAdmin);
 		setShowResults(false);
 		setResults(null);
 
@@ -119,6 +134,7 @@ export default function Home() {
 				<ModeSelector
 					isBusinessMode={isBusinessMode}
 					isExpertMode={isExpertMode}
+					isAdminMode={isAdminMode}
 					onModeChange={handleModeChange}
 					hasUserInput={hasUserInput}
 				/>
@@ -126,7 +142,11 @@ export default function Home() {
 
 			{/* Содержимое в зависимости от режима - с анимацией */}
 			<div className='transition-all duration-300 ease-in-out'>
-				{isExpertMode ? (
+				{isAdminMode ? (
+					<div className='fade-in'>
+						<AdminPanel />
+					</div>
+				) : isExpertMode ? (
 					<div className='fade-in'>
 						<ExpertSettings
 							isBusinessMode={isBusinessMode}

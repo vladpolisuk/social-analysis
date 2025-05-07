@@ -66,8 +66,9 @@ export interface BloggerMetrics {
 
 export interface ScenarioResults {
 	activity_scenario: ScenarioData; // Сценарий "Увеличение активности"
-	engagement_scenario: ScenarioData; // Сценарий "Увеличение вовлеченности"
+	engagement_scenario: ScenarioData; // Сценарий "Повышение вовлеченности"
 	collaboration_scenario: ScenarioData; // Сценарий "Коллаборации"
+	education_scenario: ScenarioData; // Сценарий "Образовательный контент"
 
 	// Ранжирование сценариев
 	suitability_ranking: string[]; // Ранжирование по пригодности
@@ -83,6 +84,7 @@ export interface ScenarioData {
 	delta_si: number; // Изменение SI
 	cost: number; // Стоимость реализации сценария (Cs)
 	description: string; // Описание сценария
+	probability?: number; // Вероятность срабатывания сценария в процентах
 }
 
 export interface BusinessAnalysisResult {
@@ -130,6 +132,7 @@ export interface ScenarioParameters {
 	cost_activity: number; // Cs для сценария "Увеличение активности"
 	cost_engagement: number; // Cs для сценария "Повышение вовлеченности"
 	cost_collaboration: number; // Cs для сценария "Коллаборации"
+	cost_education: number; // Cs для сценария "Образовательный контент"
 }
 
 export interface BusinessSettings {
